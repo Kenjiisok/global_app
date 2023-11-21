@@ -1,12 +1,19 @@
 import React, { useState } from "react";
 import { View, Text, SafeAreaView, Keyboard, Alert } from "react-native";
-import COLORS from "../const/colors"
+import COLORS from "../const/colors";
 import { auth } from "../../firebaseAuth";
 import { StatusBar } from "expo-status-bar";
 import CustomButton from "../Components/CustomButton";
 import CustomLoader from "../Components/CustomLoader";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import CustomInput from "../Components/CustomInput";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 
 const LoginScreen = ({ navigation }) => {
   const [inputs, setInputs] = useState({
@@ -16,20 +23,46 @@ const LoginScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
+  //Validar se o usuario colocou algum input
+  const validate = async () => {
+    Keyboard.dismiss();
+    let isValid = true;
+    if (!inputs.email) {
+      handleError("Por favor insira o email", "email");
+      isValid = false;
+    }
+    if (!inputs.password) {
+      handleError("Por favor insira sua senha", "password");
+      isValid = false;
+    }
+    if (isValid) {
+      login(); //Caso tudo ok, segue para o login
+    }
+  };
+
+  const checkUserInfoExists = async (userId) => {
+    const db = getFirestore();
+    const infoRef = collection(db, "infos");
+    const q = query(infoRef, where("userId", "==", userId));
+    const infosSnapshot = await getDocs(q);
+    return !infosSnapshot.empty; // retorna true se encontrar informações
+  };
+
   const login = async () => {
     setLoading(true);
     try {
-      const user = await signInWithEmailAndPassword(
+      const userCredential = await signInWithEmailAndPassword(
         auth,
         inputs.email,
         inputs.password
       );
-      console.log(user);
-      navigation.replace("HomeScreen");
+      const userExists = await checkUserInfoExists(userCredential.user.uid);
+      navigation.replace(userExists ? "HomeScreen" : "InfoScreen");
     } catch (error) {
-      Alert.alert("dados invalidos");
-      setLoading(false);
+      Alert.alert("Falha no Login", error.message); // Mostra uma mensagem de erro mais específica
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -57,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
               fontStyle: "italic",
             }}
           >
-            Notes app.
+            IncluStep.
           </Text>
         </View>
 

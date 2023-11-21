@@ -20,11 +20,36 @@ const RegisterScreen = ({ navigation }) => {
   const [inputs, setInputs] = useState({
     email: "",
     password: "",
-    fullname: "",
   });
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+
+  // Função para validar os inputs
+  const validate = () => {
+    Keyboard.dismiss();
+    let isValid = true;
+
+    if (!inputs.email) {
+      handleError("Por favor insira um email", "email");
+      isValid = false;
+    } else if (!inputs.email.includes("@")) {
+      handleError("Email inválido", "email");
+      isValid = false;
+    }
+
+    if (!inputs.password) {
+      handleError("Por favor insira uma senha", "password");
+      isValid = false;
+    } else if (inputs.password.length < 6) {
+      handleError("A senha deve conter pelo menos 6 caracteres", "password");
+      isValid = false;
+    }
+
+    if (isValid) {
+      register(); // Caso tudo esteja correto, procede para o registro
+    }
+  };
 
   const register = async () => {
     setLoading(true);
@@ -36,7 +61,6 @@ const RegisterScreen = ({ navigation }) => {
       );
       const db = getFirestore();
       await setDoc(doc(db, "users", userCredential.user.uid), {
-        fullname: inputs.fullname,
         email: inputs.email,
       });
       setLoading(false);
@@ -63,7 +87,7 @@ const RegisterScreen = ({ navigation }) => {
       <SafeAreaView style={{ backgroundColor: COLORS.white, flex: 1 }}>
         <CustomLoader visible={loading} />
         <ScrollView
-          contentContainerStyle={{ paddingTop: 50, paddingHorizontal: 20 }}
+          contentContainerStyle={{ paddingTop: 130, paddingHorizontal: 20 }}
         >
           <Text
             style={{
@@ -85,19 +109,10 @@ const RegisterScreen = ({ navigation }) => {
               marginTop: 10,
             }}
           >
-            Notes App.
+            IncluStep.
           </Text>
 
           <View style={{ marginVertical: 20 }}>
-            <CustomInput
-              onChangeText={(text) => handleOnChange(text, "fullname")}
-              onFocus={() => handleError(null, "fullname")}
-              iconName="account-outline"
-              label="Nome Completo"
-              placeholder="Coloque seu nome completo"
-              error={errors.fullname}
-            />
-
             <CustomInput
               onChangeText={(text) => handleOnChange(text, "email")}
               onFocus={() => handleError(null, "email")}
