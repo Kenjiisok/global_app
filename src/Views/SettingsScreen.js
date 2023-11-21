@@ -10,6 +10,7 @@ import {
   collection,
   query,
   where,
+  getDocs,
 } from "firebase/firestore";
 import { StatusBar } from "expo-status-bar";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -35,7 +36,6 @@ const SettingsScreen = ({ navigation }) => {
           );
           const infoSnapshot = await getDocs(infoQuery);
           if (!infoSnapshot.empty) {
-            // Assegure-se de que está extraindo os dados corretamente
             setUserInfos({
               id: infoSnapshot.docs[0].id,
               ...infoSnapshot.docs[0].data(),
@@ -46,8 +46,11 @@ const SettingsScreen = ({ navigation }) => {
         }
       }
     });
+
+    // Debug para verificar se os dados de userInfos estão corretos
+
     return unsubscribe;
-  }, []);
+  }, [userInfos]);
 
   const logOut = async () => {
     try {
@@ -60,10 +63,7 @@ const SettingsScreen = ({ navigation }) => {
 
   // Função para navegar para a tela de edição
   const navigateToEditScreen = () => {
-    useEffect(() => {
-        // ... código existente
-        console.log("userInfos na SettingsScreen: ", userInfos);
-      }, [userInfos]);
+    // Simplesmente navegue para a tela de edição com userInfos
     navigation.navigate("EditInfoScreen", { userInfos });
   };
 
