@@ -46,9 +46,6 @@ const SettingsScreen = ({ navigation }) => {
         }
       }
     });
-
-    // Debug para verificar se os dados de userInfos estão corretos
-
     return unsubscribe;
   }, [userInfos]);
 
@@ -61,9 +58,7 @@ const SettingsScreen = ({ navigation }) => {
     }
   };
 
-  // Função para navegar para a tela de edição
   const navigateToEditScreen = () => {
-    // Simplesmente navegue para a tela de edição com userInfos
     navigation.navigate("EditInfoScreen", { userInfos });
   };
 

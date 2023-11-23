@@ -18,12 +18,11 @@ const EditInfoScreen = ({ route, navigation }) => {
       setInfo(route.params.userInfos);
     } else {
       Alert.alert("Erro", "Informações do usuário não encontradas.");
-      navigation.goBack(); // Retorna para a tela anterior se não houver dados
+      navigation.goBack(); 
     }
   }, [route.params?.userInfos]);
 
   const handleUpdate = async () => {
-    // Verifica se userInfos e id estão disponíveis
     if (!route.params?.userInfos || !route.params.userInfos.id) {
       Alert.alert("Erro", "Não foi possível atualizar as informações.");
       return;
