@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Alert } from "react-native";
+import { Text, View, StyleSheet, Alert, ScrollView } from "react-native";
 import CustomButton from "../Components/CustomButton";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebaseAuth";
@@ -14,6 +14,7 @@ import {
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useFocusEffect } from "@react-navigation/native";
 import { OPEN_AI_KEY } from "@env";
+import COLORS from "../const/colors";
 
 const HomeScreen = ({ navigation }) => {
   const [infos, setInfos] = useState([]);
@@ -55,26 +56,40 @@ const HomeScreen = ({ navigation }) => {
         return;
       }
 
-      const prompt = `Gerar um plano de treino para uma pessoa com as seguintes informações: ${JSON.stringify(
+      const prompt = `Gerar um plano de treino para uma pessoa com deficiência com as seguintes informações: ${JSON.stringify(
         infos
       )}`;
+
+      const requestBody = {
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: "Você é um assistente de treino.",
+          },
+          {
+            role: "user",
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 1500,
+      };
+
       const response = await fetch(
-        "https://api.openai.com/v1/engines/text-davinci-003/completions",
+        "https://api.openai.com/v1/chat/completions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${OPEN_AI_KEY}`,
           },
-          body: JSON.stringify({
-            prompt: prompt,
-            temperature: 0.7,
-            max_tokens: 150,
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 
       const data = await response.json();
+      console.log("Resposta da API:", data); // Log da resposta da API
 
       if (data.error) {
         if (data.error.type === "insufficient_quota") {
@@ -88,8 +103,13 @@ const HomeScreen = ({ navigation }) => {
         return;
       }
 
-      if (data.choices && data.choices[0] && data.choices[0].text) {
-        setWorkout(data.choices[0].text.trim());
+      if (
+        data.choices &&
+        data.choices[0] &&
+        data.choices[0].message &&
+        data.choices[0].message.content
+      ) {
+        setWorkout(data.choices[0].message.content.trim());
       } else {
         Alert.alert("Erro", "Resposta inválida da API.");
       }
@@ -112,20 +132,32 @@ const HomeScreen = ({ navigation }) => {
           />
         </View>
 
-        <View style={styles.infoContainer}>
+        <ScrollView style={styles.infoContainer}>
           {infos.map((info) => (
             <View key={info.id} style={styles.infoCard}>
-              <Text style={styles.infoText}>Nome: {info.nome}</Text>
-              <Text style={styles.infoText}>Idade: {info.idade}</Text>
-              <Text style={styles.infoText}>Peso: {info.peso}</Text>
-              <Text style={styles.infoText}>Descrição: {info.descricao}</Text>
+              <View style={styles.infoRow}>
+                <Icon name="account-outline" style={styles.iconStyle} />
+                <Text style={styles.infoText}>Nome: {info.nome}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Icon name="counter" style={styles.iconStyle} />
+                <Text style={styles.infoText}>Idade: {info.idade}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Icon name="weight-lifter" style={styles.iconStyle} />
+                <Text style={styles.infoText}>Peso: {info.peso}</Text>
+              </View>
+              <View style={styles.infoRow}>
+                <Icon name="typewriter" style={styles.iconStyle} />
+                <Text style={styles.infoText}>Descrição: {info.descricao}</Text>
+              </View>
             </View>
           ))}
           <View style={{ margin: 20 }}>
             <CustomButton title="Gerar Treino" onPress={generateWorkout} />
             {workout ? <Text style={styles.workoutText}>{workout}</Text> : null}
           </View>
-        </View>
+        </ScrollView>
       </View>
     </>
   );
@@ -134,9 +166,11 @@ const HomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   workoutText: {
     marginTop: 20,
-    padding: 10,
+    padding: 5,
     backgroundColor: "#f0f0f0",
     borderRadius: 5,
+    borderColor: COLORS.black,
+    borderWidth: 1,
   },
   container: {
     flex: 1,
@@ -157,14 +191,26 @@ const styles = StyleSheet.create({
     fontSize: 38,
     marginRight: 20,
   },
-  infoContainer: {
-    // estilos para o container das informações
-  },
   infoCard: {
-    // estilos para cada cartão de informação
+    borderColor: COLORS.black,
+    borderRadius: 5,
+    padding: 10,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   infoText: {
-    // estilos para o texto das informações
+    marginLeft: 10,
+    borderColor: COLORS.black,
+    borderWidth: 1,
+    padding: 10,
+    margin: 10,
+    borderRadius: 10,
+  },
+  iconStyle: {
+    fontSize: 20,
+    color: COLORS.black,
   },
 });
 
