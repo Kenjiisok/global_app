@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet, Alert, ScrollView } from "react-native";
+import { Text, View, StyleSheet, Alert, ScrollView, Image } from "react-native";
 import CustomButton from "../Components/CustomButton";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebaseAuth";
@@ -15,10 +15,12 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useFocusEffect } from "@react-navigation/native";
 import { OPEN_AI_KEY } from "@env";
 import COLORS from "../const/colors";
+import boneco from "../../assets/boneco.gif";
 
 const HomeScreen = ({ navigation }) => {
   const [infos, setInfos] = useState([]);
   const [workout, setWorkout] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchInfo = async () => {
     const currentUser = auth.currentUser;
@@ -49,6 +51,7 @@ const HomeScreen = ({ navigation }) => {
 
   const generateWorkout = async () => {
     try {
+      setIsLoading(true);
       console.log("Infos:", infos);
 
       if (infos.length === 0) {
@@ -116,6 +119,8 @@ const HomeScreen = ({ navigation }) => {
     } catch (error) {
       console.error("Erro ao gerar treino: ", error);
       Alert.alert("Erro", "Não foi possível gerar o treino.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,32 +137,43 @@ const HomeScreen = ({ navigation }) => {
           />
         </View>
 
-        <ScrollView style={styles.infoContainer}>
-          {infos.map((info) => (
-            <View key={info.id} style={styles.infoCard}>
-              <View style={styles.infoRow}>
-                <Icon name="account-outline" style={styles.iconStyle} />
-                <Text style={styles.infoText}>Nome: {info.nome}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Icon name="counter" style={styles.iconStyle} />
-                <Text style={styles.infoText}>Idade: {info.idade}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Icon name="weight-lifter" style={styles.iconStyle} />
-                <Text style={styles.infoText}>Peso: {info.peso}</Text>
-              </View>
-              <View style={styles.infoRow}>
-                <Icon name="typewriter" style={styles.iconStyle} />
-                <Text style={styles.infoText}>Descrição: {info.descricao}</Text>
-              </View>
-            </View>
-          ))}
-          <View style={{ margin: 20 }}>
-            <CustomButton title="Gerar Treino" onPress={generateWorkout} />
-            {workout ? <Text style={styles.workoutText}>{workout}</Text> : null}
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <Image source={boneco} style={styles.loadingGif} />
+            <Text style={styles.loadingText}>Gerando treino...</Text>
           </View>
-        </ScrollView>
+        ) : (
+          <ScrollView style={styles.infoContainer}>
+            {infos.map((info) => (
+              <View key={info.id} style={styles.infoCard}>
+                <View style={styles.infoRow}>
+                  <Icon name="account-outline" style={styles.iconStyle} />
+                  <Text style={styles.infoText}>Nome: {info.nome}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Icon name="counter" style={styles.iconStyle} />
+                  <Text style={styles.infoText}>Idade: {info.idade}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Icon name="weight-lifter" style={styles.iconStyle} />
+                  <Text style={styles.infoText}>Peso: {info.peso}</Text>
+                </View>
+                <View style={styles.infoRow}>
+                  <Icon name="typewriter" style={styles.iconStyle} />
+                  <Text style={styles.infoText}>
+                    Descrição: {info.descricao}
+                  </Text>
+                </View>
+              </View>
+            ))}
+            <View style={{ margin: 20 }}>
+              <CustomButton title="Gerar Treino" onPress={generateWorkout} />
+              {workout ? (
+                <Text style={styles.workoutText}>{workout}</Text>
+              ) : null}
+            </View>
+          </ScrollView>
+        )}
       </View>
     </>
   );
@@ -171,6 +187,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderColor: COLORS.black,
     borderWidth: 1,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingGif: {
+    width: 200,
+    height: 200,
+  },
+  loadingText: {
+    marginTop: 20,
+    fontSize: 16,
+    color: COLORS.black,
   },
   container: {
     flex: 1,
