@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Text, View, StyleSheet } from "react-native";
+import { Text, View, StyleSheet, Alert } from "react-native";
 import CustomButton from "../Components/CustomButton";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebaseAuth";
@@ -13,12 +13,7 @@ import {
 } from "firebase/firestore";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useFocusEffect } from "@react-navigation/native";
-import { Configuration, OpenAIApi } from "openai";
 import { OPEN_AI_KEY } from "@env";
-
-// Configuração da API do OpenAI
-const configuration = new Configuration({ apiKey: OPEN_AI_KEY });
-const openAI = new OpenAIApi(configuration);
 
 const HomeScreen = ({ navigation }) => {
   const [infos, setInfos] = useState([]);
@@ -53,6 +48,13 @@ const HomeScreen = ({ navigation }) => {
 
   const generateWorkout = async () => {
     try {
+      console.log("Infos:", infos);
+
+      if (infos.length === 0) {
+        Alert.alert("Erro", "Informações do usuário não disponíveis.");
+        return;
+      }
+
       const prompt = `Gerar um plano de treino para uma pessoa com as seguintes informações: ${JSON.stringify(
         infos
       )}`;
@@ -62,7 +64,7 @@ const HomeScreen = ({ navigation }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${OPEN_AI_KEY}`, // Sua chave da API OpenAI
+            Authorization: `Bearer ${OPEN_AI_KEY}`,
           },
           body: JSON.stringify({
             prompt: prompt,
@@ -73,7 +75,24 @@ const HomeScreen = ({ navigation }) => {
       );
 
       const data = await response.json();
-      setWorkout(data.choices[0].text.trim());
+
+      if (data.error) {
+        if (data.error.type === "insufficient_quota") {
+          Alert.alert(
+            "Quota Exceeded",
+            "You have exceeded your OpenAI API quota. Please try again later."
+          );
+        } else {
+          Alert.alert("Erro", `API Error: ${data.error.message}`);
+        }
+        return;
+      }
+
+      if (data.choices && data.choices[0] && data.choices[0].text) {
+        setWorkout(data.choices[0].text.trim());
+      } else {
+        Alert.alert("Erro", "Resposta inválida da API.");
+      }
     } catch (error) {
       console.error("Erro ao gerar treino: ", error);
       Alert.alert("Erro", "Não foi possível gerar o treino.");
