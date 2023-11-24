@@ -4,6 +4,10 @@
 //João Alves - RM95265
 
 
+//OBS: O treino realmente demora para ser gerado, em torno de 1-2 minutos.
+//Não achei maneiras de deixar ele mais rapido, espero que entenda.
+
+
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./src/Views/LoginScreen";
