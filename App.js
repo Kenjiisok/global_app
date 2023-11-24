@@ -1,6 +1,10 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useState } from "react";
+//Eduardo Kenji - RM94180
+//Matheus de Deus - RM95021
+//João Pacheco - RM94692
+//João Alves - RM95265
+
+
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import LoginScreen from "./src/Views/LoginScreen";
 import RegisterScreen from "./src/Views/RegisterScreen";

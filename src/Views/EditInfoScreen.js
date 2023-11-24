@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, SafeAreaView, ScrollView, Alert } from "react-native";
+import { Text, SafeAreaView, ScrollView, Alert } from "react-native";
 import CustomInput from "../Components/CustomInput";
 import CustomButton from "../Components/CustomButton";
 import { getFirestore, doc, updateDoc } from "firebase/firestore";
