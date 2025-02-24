@@ -1,9 +1,3 @@
-//Eduardo Kenji - RM94180
-//Matheus de Deus - RM95021
-//João Pacheco - RM94692
-//João Alves - RM95265
-
-
 //OBS: O treino realmente demora para ser gerado, em torno de 1-2 minutos.
 //Não achei maneiras de deixar ele mais rapido, espero que entenda.
 
